@@ -1,15 +1,17 @@
-use axum::http::{StatusCode};
-use axum::Json;
-use axum::response::{IntoResponse, Response};
+use axum::{
+    http::{StatusCode},
+    response::{IntoResponse, Response},
+    Json,
+};
 use http_api_problem::HttpApiProblem;
-use thiserror::Error;
+use validator::ValidationErrors;
 
-#[derive(Error, Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Internal server error")]
+    #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
-    #[error("Request body validation error")]
-    InvalidEntity(#[from] validator::ValidationError)
+    #[error("validation error in request body")]
+    InvalidEntity(#[from] ValidationErrors),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -20,9 +22,8 @@ impl IntoResponse for Error {
             Self::InvalidEntity(errors) => HttpApiProblem::new(StatusCode::UNPROCESSABLE_ENTITY)
                 .title("Unprocessable entity in request body")
                 .detail(errors.to_string()),
-            Self::Anyhow(errors) => HttpApiProblem::new(StatusCode::INTERNAL_SERVER_ERROR)
-                .title("Internal Server Error")
-                .detail(errors.to_string()),
+            _ => HttpApiProblem::new(StatusCode::INTERNAL_SERVER_ERROR)
+                .title("Internal Server Error"),
         };
         (payload.status.unwrap(), Json(payload)).into_response()
     }
