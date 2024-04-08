@@ -1,0 +1,17 @@
+[package]
+name = "gkl-disco-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = [ "serde", "now" ] }
+anyhow = "1.0"
+thiserror = "1.0"
+validator = { version = "0.18", features = ["derive"] }
+http-api-problem = { version = "0.58", features = [ "axum" ] }
+reqwest = { version = "0.12", features = [] }
+tracing = "0.1"
