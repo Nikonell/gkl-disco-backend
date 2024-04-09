@@ -37,7 +37,6 @@ pub async fn search_track(text: &String, limit: u16) -> anyhow::Result<Vec<Found
         }))
         .collect();
 
-    // Apply the limit to the number of tracks returned
     mapped_tracks.truncate(limit as usize);
 
     Ok(mapped_tracks)

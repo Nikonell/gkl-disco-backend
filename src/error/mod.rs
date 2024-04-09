@@ -8,6 +8,8 @@ use validator::ValidationErrors;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    #[error("an internal database error occurred")]
+    DbErr(#[from] sea_orm::DbErr),
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
     #[error("validation error in request body")]
