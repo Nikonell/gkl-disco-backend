@@ -1,13 +1,15 @@
+use std::sync::Arc;
 use sea_orm::{DatabaseConnection, DbErr};
 use crate::data::repository::song_request::SongRequestRepository;
 use crate::domain::entities::song_request::{Model as SongRequestModel, ActiveModel as SongRequestActiveModel};
 
-pub struct SongRequestService<'a> {
-    repository: SongRequestRepository<'a>,
+#[derive(Clone)]
+pub struct SongRequestService {
+    repository: SongRequestRepository,
 }
 
-impl<'a> SongRequestService<'a> {
-    pub fn new(connection: &'a DatabaseConnection) -> Self {
+impl SongRequestService {
+    pub fn new(connection: Arc<DatabaseConnection>) -> Self {
         let repository = SongRequestRepository::new(connection);
         Self { repository }
     }

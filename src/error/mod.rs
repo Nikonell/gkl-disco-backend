@@ -14,6 +14,8 @@ pub enum Error {
     Anyhow(#[from] anyhow::Error),
     #[error("validation error in request body")]
     InvalidEntity(#[from] ValidationErrors),
+    #[error("http error")]
+    HttpProblem(#[from] HttpApiProblem),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -24,6 +26,7 @@ impl IntoResponse for Error {
             Self::InvalidEntity(errors) => HttpApiProblem::new(StatusCode::UNPROCESSABLE_ENTITY)
                 .title("Unprocessable entity in request body")
                 .detail(errors.to_string()),
+            Self::HttpProblem(problem) => problem,
             _ => HttpApiProblem::new(StatusCode::INTERNAL_SERVER_ERROR)
                 .title("Internal Server Error"),
         };
