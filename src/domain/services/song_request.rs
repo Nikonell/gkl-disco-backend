@@ -26,6 +26,10 @@ impl SongRequestService {
         self.repository.create(model).await
     }
 
+    pub async fn update_song_request(&self, model: SongRequestActiveModel) -> Result<SongRequestModel, DbErr> {
+        self.repository.update(model).await
+    }
+
     pub async fn delete_song_request(&self, id: i32) -> Result<u64, DbErr> {
         self.repository.delete(id).await
     }
