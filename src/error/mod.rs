@@ -27,8 +27,11 @@ impl IntoResponse for Error {
                 .title("Unprocessable entity in request body")
                 .detail(errors.to_string()),
             Self::HttpProblem(problem) => problem,
+            Self::Anyhow(error) => HttpApiProblem::new(StatusCode::INTERNAL_SERVER_ERROR)
+                .title("Internal Server Error")
+                .detail(error.to_string()),
             _ => HttpApiProblem::new(StatusCode::INTERNAL_SERVER_ERROR)
-                .title("Internal Server Error"),
+                .title("Internal Server Error")
         };
         (payload.status.unwrap(), Json(payload)).into_response()
     }

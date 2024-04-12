@@ -1,7 +1,8 @@
 use std::sync::Arc;
 use sea_orm::{DatabaseConnection, DbErr};
 use crate::data::repository::song_request::SongRequestRepository;
-use crate::domain::entities::song_request::{Model as SongRequestModel, ActiveModel as SongRequestActiveModel};
+use crate::domain::entities::prelude::SongRequestEntity;
+use crate::domain::entities::song_request::{Model as SongRequestModel, ActiveModel as SongRequestActiveModel, Model, Column};
 
 #[derive(Clone)]
 pub struct SongRequestService {
@@ -20,6 +21,10 @@ impl SongRequestService {
 
     pub async fn get_song_request_by_id(&self, id: i32) -> Result<Option<SongRequestModel>, DbErr> {
         self.repository.find_by_id(id).await
+    }
+
+    pub async fn get_song_request_by_song_id(&self, yandex_id: i32) -> Result<Option<Model>, DbErr> {
+        self.repository.find_by_song_id(yandex_id).await
     }
 
     pub async fn create_song_request(&self, model: SongRequestActiveModel) -> Result<SongRequestModel, DbErr> {

@@ -5,6 +5,7 @@ use http_api_problem::HttpApiProblem;
 use reqwest::StatusCode;
 use sea_orm::ActiveValue::Set;
 use serde::Deserialize;
+use crate::data::source::yandex_music_api::get_track_by_id;
 use crate::domain::entities::song_request;
 use crate::error;
 use crate::infrastructure::state::AppState;
@@ -27,8 +28,6 @@ pub async fn get_by_id(Path(id): Path<i32>, Extension(state): Extension<AppState
 #[derive(Deserialize)]
 pub struct CreateSongRequest {
     yandex_id: i32,
-    song_name: String,
-    artist_names: String,
     say_hello: bool,
     hello_from: Option<String>,
     hello_to: Option<String>,
@@ -36,10 +35,16 @@ pub struct CreateSongRequest {
 }
 
 pub async fn create(Extension(state): Extension<AppState>, Json(model): Json<CreateSongRequest>) -> error::Result<Json<song_request::Model>> {
+    match state.song_request_service.get_song_request_by_song_id(model.yandex_id).await {
+        Ok(Some(_)) => return Err(error::Error::from(HttpApiProblem::new(StatusCode::CONFLICT).title("This song already requested"))),
+        Err(err) => return Err(error::Error::from(err)),
+        _ => ()
+    }
+    let track = get_track_by_id(model.yandex_id as i64).await?;
     let song_request = song_request::ActiveModel {
         yandex_id: Set(model.yandex_id),
-        song_name: Set(model.song_name),
-        artist_names: Set(model.artist_names),
+        song_name: Set(track.title),
+        artist_names: Set(track.artist_names.join(", ")),
         say_hello: Set(model.say_hello),
         hello_from: Set(model.hello_from),
         hello_to: Set(model.hello_to),
