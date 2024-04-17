@@ -1,4 +1,4 @@
-use axum::{Json, extract::Query, debug_handler};
+use axum::{Json, extract::Query};
 use crate::data::source::yandex_music_api::search_tracks;
 use crate::error::Result;
 use serde::Deserialize;
@@ -10,7 +10,6 @@ pub struct SearchTrackFilter {
     limit: Option<u16>,
 }
 
-#[debug_handler]
 pub async fn search_track_handler(Query(filter): Query<SearchTrackFilter>) -> Result<Json<Vec<FoundTrack>>> {
     let result = search_tracks(&filter.text, filter.limit.unwrap_or(10)).await?;
     Ok(Json(result))

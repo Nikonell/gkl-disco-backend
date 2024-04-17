@@ -6,6 +6,7 @@ use tokio::net::TcpListener;
 use crate::infrastructure::state::AppState;
 use crate::presentation::routes::external_music_routes::external_music_routes;
 use crate::presentation::routes::song_request_routes::song_request_routes;
+use crate::presentation::routes::forbidden_artist_routes::forbidden_artist_routes;
 
 mod domain;
 mod data;
@@ -25,6 +26,7 @@ async fn main() {
     let app = Router::new()
         .merge(external_music_routes())
         .nest("/song_requests", song_request_routes())
+        .nest("/forbiden_artists", forbidden_artist_routes())
         .layer(Extension(state));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
