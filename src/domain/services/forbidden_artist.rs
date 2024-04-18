@@ -18,7 +18,7 @@ impl ForbiddenArtistService {
         self.repository.find_all().await
     }
 
-    pub async fn get_first_forbidden_artist(&self, name: String) -> Result<Option<ForbiddenArtistModel>, DbErr> {
+    pub async fn get_first_forbidden_artist(&self, name: &String) -> Result<Option<ForbiddenArtistModel>, DbErr> {
         self.repository.find_first(name).await
     }   
 }

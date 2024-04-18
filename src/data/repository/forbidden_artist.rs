@@ -1,6 +1,6 @@
 use std::sync::Arc;
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
-use crate::domain::entities::forbidden_artist::{Entity as ForbiddenArtistEntity, Model, ActiveModel, Column};
+use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
+use crate::domain::entities::forbidden_artist::{Entity as ForbiddenArtistEntity, Model, Column};
 
 #[derive(Clone)]
 pub struct ForbiddenArtistRepository {
@@ -16,9 +16,9 @@ impl ForbiddenArtistRepository {
         ForbiddenArtistEntity::find().all(self.connection.as_ref()).await
     }
 
-    pub async fn find_first(&self, name: String) -> Result<Option<Model>, DbErr> {
+    pub async fn find_first(&self, name: &String) -> Result<Option<Model>, DbErr> {
         ForbiddenArtistEntity::find()
-            .filter(Column::Name.contains(&name).or(Column::Summary.contains(&name)))
+            .filter(Column::Name.contains(name).or(Column::Summary.contains(name)))
             .one(self.connection.as_ref()).await
     }
 }

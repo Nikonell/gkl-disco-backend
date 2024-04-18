@@ -16,6 +16,9 @@ pub struct Model {
     pub hello_from: Option<String>,
     pub hello_to: Option<String>,
     pub hello_text: Option<String>,
+    pub explicit_correct: bool,
+    pub artist_correct: bool,
+    pub expert_mark: Option<bool>
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

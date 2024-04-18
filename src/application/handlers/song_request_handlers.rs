@@ -41,6 +41,14 @@ pub async fn create(Extension(state): Extension<AppState>, Json(model): Json<Cre
         _ => ()
     }
     let track = get_track_by_id(model.yandex_id as i64).await?;
+    let mut artist_forbidden = false;
+    for artist in &track.artist_names {
+        match state.forbidden_artist_service.get_first_forbidden_artist(artist).await {
+            Ok(Some(_)) => artist_forbidden = true,
+            Err(err) => return Err(error::Error::from(err)),
+            _ => ()
+        }
+    }
     let song_request = song_request::ActiveModel {
         yandex_id: Set(model.yandex_id),
         song_name: Set(track.title),
@@ -49,6 +57,8 @@ pub async fn create(Extension(state): Extension<AppState>, Json(model): Json<Cre
         hello_from: Set(model.hello_from),
         hello_to: Set(model.hello_to),
         hello_text: Set(model.hello_text),
+        explicit_correct: Set(!track.explicit),
+        artist_correct: Set(!artist_forbidden),
         ..Default::default()
     };
     Ok(Json(state.song_request_service.create_song_request(song_request).await?))
@@ -63,6 +73,9 @@ pub struct UpdateSongRequest {
     hello_from: Option<String>,
     hello_to: Option<String>,
     hello_text: Option<String>,
+    explicit_correct: Option<bool>,
+    artist_correct: Option<bool>,
+    expert_mark: Option<bool>
 }
 
 pub async fn update(Path(id): Path<i32>, Extension(state): Extension<AppState>, Json(model): Json<UpdateSongRequest>) -> error::Result<Json<song_request::Model>> {
@@ -80,6 +93,9 @@ pub async fn update(Path(id): Path<i32>, Extension(state): Extension<AppState>, 
     if let Some(hello_from) = model.hello_from { song_request.hello_from = Set(Some(hello_from)); }
     if let Some(hello_to) = model.hello_to { song_request.hello_to = Set(Some(hello_to)); }
     if let Some(hello_text) = model.hello_text { song_request.hello_text = Set(Some(hello_text)); }
+    if let Some(explicit_correct) = model.explicit_correct { song_request.explicit_correct = Set(explicit_correct); }
+    if let Some(artist_correct) = model.artist_correct { song_request.artist_correct = Set(artist_correct); }
+    if let Some(expert_mark) = model.expert_mark { song_request.expert_mark = Set(Some(expert_mark)); }
     Ok(Json(state.song_request_service.update_song_request(song_request).await?))
 }
 
