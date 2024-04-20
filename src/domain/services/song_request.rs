@@ -1,8 +1,7 @@
 use std::sync::Arc;
 use sea_orm::{DatabaseConnection, DbErr};
 use crate::data::repository::song_request::SongRequestRepository;
-use crate::domain::entities::prelude::SongRequestEntity;
-use crate::domain::entities::song_request::{Model as SongRequestModel, ActiveModel as SongRequestActiveModel, Model, Column};
+use crate::domain::entities::song_request::{Model as SongRequestModel, ActiveModel as SongRequestActiveModel, Model};
 
 #[derive(Clone)]
 pub struct SongRequestService {

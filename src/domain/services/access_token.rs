@@ -1,9 +1,9 @@
 use std::sync::Arc;
+use axum::http::HeaderMap;
 use http_api_problem::HttpApiProblem;
 use reqwest::StatusCode;
-use sea_orm::{DatabaseConnection, DbErr};
-use crate::data::repository::access_token::AccessTokenRepository;
-use crate::domain::entities::access_token::{Model as AccessTokenModel, ActiveModel as AccessTokenActiveModel};
+use sea_orm::DatabaseConnection;
+use crate::{data::repository::access_token::AccessTokenRepository, error};
 
 #[derive(Clone)]
 pub struct AccessTokenService {
@@ -16,10 +16,13 @@ impl AccessTokenService {
         Self { repository }
     }
 
-    pub async fn authorize(&self, token: String) -> Result<(), HttpApiProblem> {
-        match self.repository.find_by_token(&token).await {
+    pub async fn authorize(&self, headers: &HeaderMap) -> error::Result<()> {
+        let err = error::Error::from(HttpApiProblem::new(StatusCode::UNAUTHORIZED).title("Unauthorized"));
+        let Some(token) = headers.get("Authorization")
+            .and_then(|v| v.to_str().ok()) else { return Err(err); };
+        match self.repository.find_by_token(&token.to_string()).await {
             Ok(Some(_)) => return Ok(()),
-            _ => return Err(HttpApiProblem::new(StatusCode::UNAUTHORIZED).title("Unauthorized")),
+            _ => return Err(err),
         }
     }
 }

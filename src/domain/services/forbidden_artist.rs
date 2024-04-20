@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use sea_orm::{DatabaseConnection, DbErr};
 use crate::data::repository::forbidden_artist::ForbiddenArtistRepository;
-use crate::domain::entities::forbidden_artist::{Model as ForbiddenArtistModel, ActiveModel as ForbiddenArtistActiveModel};
+use crate::domain::entities::forbidden_artist::{Model as ForbiddenArtistModel};
 
 #[derive(Clone)]
 pub struct ForbiddenArtistService {

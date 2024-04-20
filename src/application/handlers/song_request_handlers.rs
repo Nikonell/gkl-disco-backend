@@ -1,3 +1,4 @@
+use axum::http::HeaderMap;
 use axum::{Extension, Json};
 use axum::extract::Path;
 use axum::response::IntoResponse;
@@ -10,12 +11,14 @@ use crate::domain::entities::song_request;
 use crate::error;
 use crate::infrastructure::state::AppState;
 
-pub async fn get_all(Extension(state): Extension<AppState>) -> error::Result<Json<Vec<song_request::Model>>> {
+pub async fn get_all(headers: HeaderMap, Extension(state): Extension<AppState>) -> error::Result<Json<Vec<song_request::Model>>> {
+    if let Err(unauthorized) = state.access_token_service.authorize(&headers).await { return Err(unauthorized); }
     let song_requests = state.song_request_service.get_all_song_requests().await?;
     Ok(Json(song_requests))
 }
 
-pub async fn get_by_id(Path(id): Path<i32>, Extension(state): Extension<AppState>) -> error::Result<Json<song_request::Model>> {
+pub async fn get_by_id(headers: HeaderMap, Path(id): Path<i32>, Extension(state): Extension<AppState>) -> error::Result<Json<song_request::Model>> {
+    if let Err(unauthorized) = state.access_token_service.authorize(&headers).await { return Err(unauthorized); }
     match state.song_request_service.get_song_request_by_id(id).await {
         Ok(Some(song_request)) => Ok(Json(song_request)),
         Ok(None) => Err(error::Error::from(
@@ -78,7 +81,8 @@ pub struct UpdateSongRequest {
     expert_mark: Option<bool>
 }
 
-pub async fn update(Path(id): Path<i32>, Extension(state): Extension<AppState>, Json(model): Json<UpdateSongRequest>) -> error::Result<Json<song_request::Model>> {
+pub async fn update(headers: HeaderMap, Path(id): Path<i32>, Extension(state): Extension<AppState>, Json(model): Json<UpdateSongRequest>) -> error::Result<Json<song_request::Model>> {
+    if let Err(unauthorized) = state.access_token_service.authorize(&headers).await { return Err(unauthorized); }
     let mut song_request: song_request::ActiveModel = match state.song_request_service.get_song_request_by_id(id).await {
         Ok(Some(song_request)) => song_request.into(),
         Ok(None) => return Err(error::Error::from(
@@ -99,7 +103,8 @@ pub async fn update(Path(id): Path<i32>, Extension(state): Extension<AppState>, 
     Ok(Json(state.song_request_service.update_song_request(song_request).await?))
 }
 
-pub async fn delete(Path(id): Path<i32>, Extension(state): Extension<AppState>) -> error::Result<impl IntoResponse> {
+pub async fn delete(headers: HeaderMap, Path(id): Path<i32>, Extension(state): Extension<AppState>) -> error::Result<impl IntoResponse> {
+    if let Err(unauthorized) = state.access_token_service.authorize(&headers).await { return Err(unauthorized); }
     match state.song_request_service.delete_song_request(id).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) => Err(e.into())
